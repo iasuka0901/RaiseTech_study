@@ -39,5 +39,13 @@
     },
     "welcome": {
         "@first": true
+    },
+    "workspace": {
+        "@folders": [
+            {
+                "name": "raisetech-live8-sample-app",
+                "path": "/submodules/raisetech-live8-sample-app"
+            }
+        ]
     }
 }
