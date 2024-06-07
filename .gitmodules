@@ -1,0 +1,3 @@
+[submodule "submodules/raisetech-live8-sample-app"]
+	path = submodules/raisetech-live8-sample-app
+	url = https://github.com/iasuka0901/RaiseTech_lesson2.git
