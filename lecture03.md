@@ -2,7 +2,7 @@
 
 ### 実施内容
 - サンプルアプリの表示<br>
-![サンプルアプリの表示](/image/sample.image1.png)
+![サンプルアプリの表示](/image/sample.image.png)
 
 - APサーバのバージョン確認<br>
 ![APサーバのバージョン](/image/sample.image2.png)
