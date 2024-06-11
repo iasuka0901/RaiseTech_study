@@ -7,8 +7,14 @@
 - APサーバのバージョン確認<br>
 ![APサーバのバージョン](/image/sample.image2.png)
 
+- APサーバの停止<br>
+![APサーバの停止](/image/sample.image4.png)
+
 - DBサーバのバージョン確認<br>
 ![DBサーバのバージョン](/image/sample.image3.png)
+
+- DBサーバの停止<br>
+![DBサーバの停止](/image/sample.image5.png)
 
 - Rails の構成管理ツール : Bundler
 
