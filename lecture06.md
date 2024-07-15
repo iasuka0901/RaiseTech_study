@@ -2,6 +2,9 @@
 
 ### 実施内容
 1.最後にAWSを利用した日の記録をCloudTrailのイベントから3つ探し出す<br>
+"eventTime": "2024-07-13T04:53:06Z"
+"eventSource": "ec2.amazonaws.com"
+"eventName": "DeleteNetworkInterface"
 ![1.最後にAWSを利用した日の記録をCloudTrailのイベントから3つ探し出す](/image/1.最後にAWSを利用した日の記録をCloudTrailのイベントから3つ探し出す.png)
 
 2.AmazonSNS作成<br>
@@ -27,7 +30,11 @@
 https://calculator.aws/#/estimate?id=f5c28564012475c5cbd73fc46815c476a1ea6af1
 
 9.現在のAWS利用料の報告<br>
+・VPCの料金とEC2の料金でUSD1.82となっている。
+・そのうち、VPC（public IPv4 address per hour）がUSD 1.81となっておりほぼVPC料金である。
+・EC2インスタンスでパブリックIPアドレスを解放し、利用料を減らすことを検討したい。
 ![9.現在のAWS利用料の報告](/image/9.現在のAWS利用料の報告.png)
+
 
 - 感想
     - アラートの閾値設定について0以上なのか0を含まないのか等設定ミスがあった。
