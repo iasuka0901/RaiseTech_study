@@ -1,7 +1,7 @@
 # テンプレートのバージョン
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 # テンプレートの説明
-Description: 'vpc-lecture10'
+Description: "vpc-lecture10"
 # パラメータセクションの開始
 Parameters:
 # テンプレート内で使用される基本的な名前のベース
@@ -32,20 +32,20 @@ Resources:
   # リソースの論理名を定義。このVPCを他のリソースから参照するための名前。
   VPC:
     # 作成するリソースのタイプを指定。「AWS::EC2::VPC」というリソースタイプ。AWSのVPCを作成
-    Type: 'AWS::EC2::VPC'
+    Type: "AWS::EC2::VPC"
     # VPCリソースのプロパティを定義するセクションの始まり
     Properties:
       # VPCのCIDRブロックを指定。「10.0.0.0/16」を設定。VPC内のIPアドレス範囲。
-      CidrBlock: '10.0.0.0/16'
+      CidrBlock: "10.0.0.0/16"
       # EnableDnsSupportとEnableDnsHostnamesプロパティをtrueに設定して、VPCのDNSサポートとDNSホスト名を有効
       EnableDnsSupport: true
       EnableDnsHostnames: true
       # ソースにタグを付けるセクションの始まり
       Tags:
         # タグのキーを定義。タグのキーは「Name」。
-        - Key: 'Name'
+        - Key: "Name"
         # 「!Sub」関数を使用してパラメータ「NameBase」の値に「-vpc」を追加したものをタグの値として設定。「!Sub」はテンプレート内の変数を置換するための関数
-          Value: !Sub ${NameBase}-vpc
+          Value: !Sub "${NameBase}-vpc"
 
 # ----------------------------------------------------------------
 #   VPC サブネットの定義
@@ -69,7 +69,7 @@ Resources:
         # タグのキーとして Name を指定
         - Key: Name
         # NameBase パラメータの値に -public-subnet-1a を付けたものを指定。NameBase が lecture10 であれば、タグの値は lecture10-public-subnet-1a
-          Value: !Sub ${NameBase}-public-subnet-1a
+          Value: !Sub "${NameBase}-public-subnet-1a"
 
   PublicSubnet1c:
     Type: AWS::EC2::Subnet
@@ -80,7 +80,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-public-subnet-1c
+          Value: !Sub "${NameBase}-public-subnet-1c"
 
   PrivateSubnet1a:
     Type: AWS::EC2::Subnet
@@ -90,7 +90,7 @@ Resources:
       AvailabilityZone: !Sub "${AWS::Region}a"
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-private-subnet-1a
+          Value: !Sub "${NameBase}-private-subnet-1a"
 
   PrivateSubnet1c:
     Type: AWS::EC2::Subnet
@@ -100,7 +100,7 @@ Resources:
       AvailabilityZone: !Sub "${AWS::Region}c"
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-private-subnet-1c
+          Value: !Sub "${NameBase}-private-subnet-1c"
 
 # ----------------------------------------------------------------
 #   VPC インターネットゲートウェイの定義
@@ -116,7 +116,7 @@ Resources:
         # タグのキーは "Name"
         - Key: Name
           # タグの値はNameBase。パラメータに基づき lecture10-igw となる
-          Value: !Sub ${NameBase}-igw
+          Value: !Sub "${NameBase}-igw"
 
 # ----------------------------------------------------------------
 #   VPCGatewayAttachmentの定義
@@ -148,7 +148,7 @@ Resources:
         # タグのキーは "Name"
         - Key: Name
           # タグの値はNameBase パラメータに基づき lecture10-route-table
-          Value: !Sub ${NameBase}-route-table
+          Value: !Sub "${NameBase}-route-table"
 
 # ----------------------------------------------------------------
 #    VPC サブネットとルートテーブルの関連付け
@@ -196,7 +196,7 @@ Resources:
     # セキュリティグループのプロパティを定義
     Properties:
       # セキュリティグループの名前です。!Sub 関数を使用して、NameBase パラメータの値を挿入し、lecture10-sg-ec2 という名前。
-      GroupName: !Sub ${NameBase}-sg-ec2
+      GroupName: !Sub "${NameBase}-sg-ec2"
       # セキュリティグループの説明
       GroupDescription: This Security Group is for EC2
       # このセキュリティグループが属するVPCのIDを指定します。!Ref 関数を使用して、VPCリソースを参照。
@@ -221,7 +221,7 @@ Resources:
       # リソースにタグを付けるセクション。Name キーと !Sub 関数で生成したタグ値lecture10-sg-ec2 を設定。
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-sg-ec2
+          Value: !Sub "${NameBase}-sg-ec2"
 
 # ----------------------------------------------------------------
 #   RDSのセキュリティグループの定義
@@ -231,7 +231,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       # GroupName はセキュリティグループの名前。!Sub 関数を使用してlecture-sg-rdsという名前。
-      GroupName: !Sub ${NameBase}-sg-rds
+      GroupName: !Sub "${NameBase}-sg-rds"
       # セキュリティグループの説明
       GroupDescription: This Security Group is for RDS
       # このセキュリティグループが属するVPCのIDを指定。!Ref 関数を使用してVPCリソースを参照。
@@ -252,7 +252,7 @@ Resources:
       # リソースにタグを付けるセクション。Name キーと !Sub 関数で生成したタグ値lecture10-sg-rdsを設定。
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-sg-rds
+          Value: !Sub "${NameBase}-sg-rds"
 
 # ----------------------------------------------------------------
 #   ALBのセキュリティグループの定義
@@ -263,7 +263,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       # GroupName はセキュリティグループの名前。!Sub 関数を使用して、lecture10-sg-albという名前。
-      GroupName: !Sub ${NameBase}-sg-alb
+      GroupName: !Sub "${NameBase}-sg-alb"
       # セキュリティグループの説明
       GroupDescription: This Security Group is for ALB
       # セキュリティグループが属するVPCのIDを指定します。!Ref関数を使用してVPCリソースを参照。
@@ -282,7 +282,7 @@ Resources:
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-sg-alb
+          Value: !Sub "${NameBase}-sg-alb"
 
 # ----------------------------------------------------------------
 #   S3バケットの定義
@@ -294,7 +294,7 @@ Resources:
     # S3バケットに関するプロパティの定義
     Properties:
       # バケットの名前。lecture10-s3
-      BucketName: !Sub ${NameBase}-20240728-s3
+      BucketName: !Sub "${NameBase}-20240728-s3"
 
 # ----------------------------------------------------------------
 #   S3 IAMロールの定義
@@ -306,7 +306,7 @@ Resources:
     # IAMロールに関するプロパティの定義
     Properties:
       #  ロールの名前。lecture10-s3-role
-      RoleName:  !Sub ${NameBase}-s3-role
+      RoleName:  !Sub "${NameBase}-s3-role"
       # ロールの信頼ポリシーを定義
       AssumeRolePolicyDocument:
         # ポリシードキュメントのバージョン
@@ -378,7 +378,7 @@ Resources:
       # タグを追加。インスタンスの名前を指定
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-ec2-1a
+          Value: !Sub "${NameBase}-ec2-1a"
 
 # ----------------------------------------------------------------
 #   RDSのシークレットマネージャーの定義
@@ -390,13 +390,13 @@ Resources:
     # リソースのプロパティを定義
     Properties:
       # シークレットの名前を指定。!Sub関数を使用してlecture10-rds-secret
-      Name: !Sub ${NameBase}-rds-secret
+      Name: !Sub "${NameBase}-rds-secret"
       # シークレットの説明文
       Description: "This SecretsManager is for RDS instance"
       # 自動的に生成されるシークレット文字列の設定を定義
       GenerateSecretString:
         # シークレットに含まれる固定の部分をJSON形式で指定。ユーザー名として"admin"を指定。
-        SecretStringTemplate: '{"username": "admin"}'
+        SecretStringTemplate: "{\"username\": \"admin\"}"
         # 自動生成されるシークレットのキーを指定
         GenerateStringKey: "password"
         # 自動生成されるパスワードの長さを指定
@@ -413,7 +413,7 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       # RDSインスタンスの名前を定義。lecture10-rds
-      DBInstanceIdentifier: !Sub ${NameBase}-rds
+      DBInstanceIdentifier: !Sub "${NameBase}-rds"
       # インスタンスのスペックを定義。db.t3.microを使用
       DBInstanceClass: db.t3.micro
       #  使用するデータベースエンジンを指定。mysql
@@ -442,7 +442,7 @@ Resources:
       # リソースに付与するタグを指定。Nameキーにlecture10-rdsという値
       Tags:
         - Key: Name
-          Value: !Sub ${NameBase}-rds
+          Value: !Sub "${NameBase}-rds"
 
 # ----------------------------------------------------------------
 #   RDSのシークレットマネージャーとRDSインスタンスの関連付け
@@ -477,7 +477,7 @@ Resources:
         # タグのキーを指定
         - Key: Name
           # タグの値を指定。lecture-rds-subnet-group
-          Value: !Sub ${NameBase}-rds-subnet-group
+          Value: !Sub "${NameBase}-rds-subnet-group"
 
 # ----------------------------------------------------------------
 #   ELB（ALB）のターゲットグループの定義
@@ -487,7 +487,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       # ターゲットグループの名前を指定。lecture10-tg
-      Name: !Sub ${NameBase}-tg
+      Name: !Sub "${NameBase}-tg"
       # ターゲットグループが使用するプロトコルを指定。HTTPプロトコルを指定
       Protocol: HTTP
       # ターゲットグループのポート番号を指定。ここではポート80。
@@ -505,7 +505,7 @@ Resources:
         # タグのキーを指定
         - Key: Name
           # タグの値を指定。lecture10-tg
-          Value: !Sub ${NameBase}-tg
+          Value: !Sub "${NameBase}-tg"
 
 # ----------------------------------------------------------------
 #  ELB（ALB）の定義
@@ -515,7 +515,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       # ロードバランサーの名前を指定。lecture10-alb
-      Name:  !Sub ${NameBase}-alb
+      Name:  !Sub "${NameBase}-alb"
       # ロードバランサーのタイプを指定。アプリケーションロードバランサー（ALB）
       Type: application
       # ロードバランサーのスキームを指定。internet-facingを設定、ロードバランサーはインターネット経由でアクセス可能
@@ -534,7 +534,7 @@ Resources:
         # タグのキーを指定
         - Key: Name
           # タグの値を指定。lecture10-alb
-          Value: !Sub ${NameBase}-alb
+          Value: !Sub "${NameBase}-alb"
 
 # ----------------------------------------------------------------
 #  ELB（ALB）のHTTPリスナーの定義

@@ -2,7 +2,7 @@
 
 ### 実施内容
 1. 第５回でAWSマネジメントコンソールを使って構築した環境をCloudFormationで構築する
-   テンプレートファイル [lecture10.yml](/file/stack-lecture10.yml) を作成しスタックを作成
+   テンプレートファイル [stack-lecture10.yml](/file/stack-lecture10.yml) を作成しスタックを作成
    <br>
    
 | 構築したもの                                         | 
