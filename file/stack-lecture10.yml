@@ -554,3 +554,4 @@ Resources:
         # リスナーがリクエストを転送するアクションのタイプを指定。リクエストをターゲットグループに転送
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
+          
