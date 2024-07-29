@@ -1,0 +1,560 @@
+# テンプレートのバージョン
+AWSTemplateFormatVersion: "2010-09-09"
+# テンプレートの説明
+Description: "vpc-lecture10"
+# パラメータセクションの開始
+Parameters:
+# テンプレート内で使用される基本的な名前のベース
+  NameBase:
+  # NameBase パラメータの説明
+    Description: this is base name
+    #文字列型の値を受け取ること
+    Type: String
+    # NameBase パラメータのデフォルト値
+    Default: lecture10 
+  # SSHアクセスを許可するIPアドレスを入力するためのパラメータを定義
+  AllowedSSHIP:
+   # SSH用のIPアドレス（例: 0.0.0.0/0）」と説明
+   Description: This is the IP address for SSH. (Ex 0.0.0.0/0)
+   # 文字列指定
+   Type: String
+   # IPアドレスの形式を指定
+   AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+   # AllowedSSHIP パラメータのデフォルト値
+   Default: 111.238.15.98/32
+
+# CloudFormationテンプレート内のリソースを定義するセクションの始まり
+Resources:
+
+# ----------------------------------------------------------------
+#   VPCの定義
+# ----------------------------------------------------------------
+  # リソースの論理名を定義。このVPCを他のリソースから参照するための名前。
+  VPC:
+    # 作成するリソースのタイプを指定。「AWS::EC2::VPC」というリソースタイプ。AWSのVPCを作成
+    Type: "AWS::EC2::VPC"
+    # VPCリソースのプロパティを定義するセクションの始まり
+    Properties:
+      # VPCのCIDRブロックを指定。「10.0.0.0/16」を設定。VPC内のIPアドレス範囲。
+      CidrBlock: "10.0.0.0/16"
+      # EnableDnsSupportとEnableDnsHostnamesプロパティをtrueに設定して、VPCのDNSサポートとDNSホスト名を有効
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      # ソースにタグを付けるセクションの始まり
+      Tags:
+        # タグのキーを定義。タグのキーは「Name」。
+        - Key: "Name"
+        # 「!Sub」関数を使用してパラメータ「NameBase」の値に「-vpc」を追加したものをタグの値として設定。「!Sub」はテンプレート内の変数を置換するための関数
+          Value: !Sub "${NameBase}-vpc"
+
+# ----------------------------------------------------------------
+#   VPC サブネットの定義
+# ----------------------------------------------------------------
+  # リソースの名前をPublicSubnet1aとする
+  PublicSubnet1a:
+    # リソースはEC2サブネットのタイプ
+    Type: AWS::EC2::Subnet
+    # サブネットのプロパティを定義
+    Properties:
+      # このサブネットが属するVPCのIDを指定。!Refは参照する際に利用する関数
+      VpcId: !Ref VPC
+      # このサブネットのCIDRブロックを指定。10.0.1.0/24は256個のIPアドレスを持つサブネット
+      CidrBlock: 10.0.1.0/24
+      # サブネットを配置するアベイラビリティゾーン。!Sub "${AWS::Region}a" はテンプレートがデプロイされているAWSリージョンに a を付けて、特定のアベイラビリティゾーンを指定。
+      AvailabilityZone: !Sub "${AWS::Region}a"
+      # このサブネット内のインスタンスに対して、起動時に自動的にパブリックIPアドレスを割り当て
+      MapPublicIpOnLaunch: true
+      # リソースにタグを追加
+      Tags:
+        # タグのキーとして Name を指定
+        - Key: Name
+        # NameBase パラメータの値に -public-subnet-1a を付けたものを指定。NameBase が lecture10 であれば、タグの値は lecture10-public-subnet-1a
+          Value: !Sub "${NameBase}-public-subnet-1a"
+
+  PublicSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Sub "${AWS::Region}c"
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-public-subnet-1c"
+
+  PrivateSubnet1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Sub "${AWS::Region}a"
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-private-subnet-1a"
+
+  PrivateSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Sub "${AWS::Region}c"
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-private-subnet-1c"
+
+# ----------------------------------------------------------------
+#   VPC インターネットゲートウェイの定義
+# ----------------------------------------------------------------
+  # リソースの名前
+  IGW:
+    # インターネットゲートウェイを定義するリソースタイプ
+    Type: AWS::EC2::InternetGateway
+    # インターネットゲートウェイのプロパティ
+    Properties:
+      # タグの設定
+      Tags:
+        # タグのキーは "Name"
+        - Key: Name
+          # タグの値はNameBase。パラメータに基づき lecture10-igw となる
+          Value: !Sub "${NameBase}-igw"
+
+# ----------------------------------------------------------------
+#   VPCGatewayAttachmentの定義
+# ----------------------------------------------------------------
+  # リソースの定義
+  VPCGatewayAttachment:
+    # VPCにインターネットゲートウェイをアタッチするためのリソースタイプ
+    Type: AWS::EC2::VPCGatewayAttachment
+    # プロパティの定義
+    Properties:
+      # アタッチするVPCのIDを参照
+      VpcId: !Ref VPC
+      # アタッチするインターネットゲートウェイのIDを参照
+      InternetGatewayId: !Ref IGW
+
+# ----------------------------------------------------------------
+#    VPC ルートテーブルの定義
+# ----------------------------------------------------------------
+ # リソースの名前
+  RouteTable:
+    # ルートテーブルを定義するリソースタイプ
+    Type: AWS::EC2::RouteTable
+    # プロパティを定義
+    Properties:
+      # ルートテーブルが属するVPCのIDを参照
+      VpcId: !Ref VPC
+      # タグの設定
+      Tags:
+        # タグのキーは "Name"
+        - Key: Name
+          # タグの値はNameBase パラメータに基づき lecture10-route-table
+          Value: !Sub "${NameBase}-route-table"
+
+# ----------------------------------------------------------------
+#    VPC サブネットとルートテーブルの関連付け
+# ----------------------------------------------------------------
+  #  リソースの名前を指定
+  SubnetRouteTableAssociation1a:
+    # サブネットとルートテーブルの関連付けであることを指定
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    # リソースのプロパティを定義
+    Properties:
+      # このサブネットが関連付けられるルートテーブルのIDを指定。!Ref RouteTableで、RouteTableリソースを参照。
+      RouteTableId: !Ref RouteTable
+      # このルートテーブルが関連付けられるサブネットのIDを指定。!Ref PublicSubnet1aで、PublicSubnet1aリソースを参照。
+      SubnetId: !Ref PublicSubnet1a
+
+  SubnetRouteTableAssociation1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref PublicSubnet1c
+
+# ----------------------------------------------------------------
+#    VPC インターネットゲートウェイとルートテーブルの関連付け
+# ----------------------------------------------------------------
+  # リソースの名前を指定
+  Route:
+    # リソースのタイプは、ルート（経路）であることを指定
+    Type: AWS::EC2::Route
+    # リソースのプロパティを定義
+    Properties:
+      # このルートが関連付けられるルートテーブルのIDを指定。!Ref RouteTableで、RouteTableリソースを参照。
+      RouteTableId: !Ref RouteTable
+      # このルートがデフォルトルート（すべてのIPアドレス）を指定。
+      DestinationCidrBlock: 0.0.0.0/0
+      # このルートが使用するインターネットゲートウェイのIDを指定。!Ref IGWで、IGWリソースを参照。
+      GatewayId: !Ref IGW
+
+# ----------------------------------------------------------------
+#   EC2のセキュリティグループの定義
+# ----------------------------------------------------------------
+  # リソース名
+  SecurityGroupEC2:
+    # AWS::EC2::SecurityGroup タイプのリソースを作成
+    Type: AWS::EC2::SecurityGroup
+    # セキュリティグループのプロパティを定義
+    Properties:
+      # セキュリティグループの名前です。!Sub 関数を使用して、NameBase パラメータの値を挿入し、lecture10-sg-ec2 という名前。
+      GroupName: !Sub "${NameBase}-sg-ec2"
+      # セキュリティグループの説明
+      GroupDescription: This Security Group is for EC2
+      # このセキュリティグループが属するVPCのIDを指定します。!Ref 関数を使用して、VPCリソースを参照。
+      VpcId: !Ref VPC
+      # インバウンドルールの設定
+      SecurityGroupIngress:
+        # HTTP（ポート80）トラフィックを全てのIPアドレスから許可するルールを追加
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        # SSH（ポート22）トラフィックを特定のIPアドレスから許可するルールを追加します。AllowedSSHIP パラメータを参照。
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedSSHIP
+      # アウトバウンドルールの設定
+      SecurityGroupEgress:
+        # 全てのプロトコルのアウトバウンドトラフィックを全てのIPアドレスに許可。-1 はAWS CloudFormationで「全てのプロトコル」を意味。
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      # リソースにタグを付けるセクション。Name キーと !Sub 関数で生成したタグ値lecture10-sg-ec2 を設定。
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-sg-ec2"
+
+# ----------------------------------------------------------------
+#   RDSのセキュリティグループの定義
+# ----------------------------------------------------------------
+  SecurityGroupRDS:
+    # AWS::EC2::SecurityGroup タイプのリソース作成
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      # GroupName はセキュリティグループの名前。!Sub 関数を使用してlecture-sg-rdsという名前。
+      GroupName: !Sub "${NameBase}-sg-rds"
+      # セキュリティグループの説明
+      GroupDescription: This Security Group is for RDS
+      # このセキュリティグループが属するVPCのIDを指定。!Ref 関数を使用してVPCリソースを参照。
+      VpcId: !Ref VPC
+      # インバウンドルールの設定
+      SecurityGroupIngress:
+      # MySQL（ポート3306）トラフィックをEC2セキュリティグループからのみ許可するルールを追加。
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          # SourceSecurityGroupId は SecurityGroupEC2 を参照
+          SourceSecurityGroupId: !Ref SecurityGroupEC2
+      # アウトバウンドルールの設定
+      SecurityGroupEgress:
+        # 全てのプロトコルのアウトバウンドトラフィックを全てのIPアドレスに許可
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      # リソースにタグを付けるセクション。Name キーと !Sub 関数で生成したタグ値lecture10-sg-rdsを設定。
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-sg-rds"
+
+# ----------------------------------------------------------------
+#   ALBのセキュリティグループの定義
+# ----------------------------------------------------------------
+  # SecurityGroupALB はリソース名。
+  SecurityGroupALB:
+    # AWS::EC2::SecurityGroupタイプのリソースを作成
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      # GroupName はセキュリティグループの名前。!Sub 関数を使用して、lecture10-sg-albという名前。
+      GroupName: !Sub "${NameBase}-sg-alb"
+      # セキュリティグループの説明
+      GroupDescription: This Security Group is for ALB
+      # セキュリティグループが属するVPCのIDを指定します。!Ref関数を使用してVPCリソースを参照。
+      VpcId: !Ref VPC
+      # インバウンドルールの設定
+      SecurityGroupIngress:
+        # HTTP（ポート80）トラフィックを全てのIPアドレスから許可するルールを追加。
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      # アウトバウンドルールの設定
+      SecurityGroupEgress:
+        # 全てのプロトコルのアウトバウンドトラフィックを全てのIPアドレスに許可。
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-sg-alb"
+
+# ----------------------------------------------------------------
+#   S3バケットの定義
+# ----------------------------------------------------------------
+  # リソースの論理ID。S3バケットを参照するための名前
+  S3:
+    # リソースのタイプ。ここではS3バケットを作成。
+    Type: AWS::S3::Bucket
+    # S3バケットに関するプロパティの定義
+    Properties:
+      # バケットの名前。lecture10-s3
+      BucketName: !Sub "${NameBase}-20240728-s3"
+
+# ----------------------------------------------------------------
+#   S3 IAMロールの定義
+# ----------------------------------------------------------------
+  # リソースの論理ID。テンプレート内でこのIAMロールを参照するための名前。
+  Role:
+    # リソースのタイプ。ここではIAMロールを作成する
+    Type: AWS::IAM::Role
+    # IAMロールに関するプロパティの定義
+    Properties:
+      #  ロールの名前。lecture10-s3-role
+      RoleName:  !Sub "${NameBase}-s3-role"
+      # ロールの信頼ポリシーを定義
+      AssumeRolePolicyDocument:
+        # ポリシードキュメントのバージョン
+        Version: "2012-10-17"
+        # ポリシーステートメントのリスト
+        Statement:
+          # ステートメントが許可（Allow）を意味する
+          - Effect: Allow
+            # ロールを引き受けることができる主体(AWSリソース等)
+            Principal:
+              # EC2サービスがロールを引き受けることを許可
+              Service: ec2.amazonaws.com
+            # 指定されたエンティティ（EC2インスタンス）が特定のIAMロールを引き受けることを許可することを意味
+            Action: sts:AssumeRole
+      # ロールにアタッチされるインラインポリシーのリスト
+      Policies:
+        # ポリシーの名前
+        - PolicyName: S3AccessPolicy
+          # ポリシーの内容を定義
+          PolicyDocument:
+            # ポリシードキュメントのバージョン
+            Version: "2012-10-17"
+            # ポリシーステートメントのリスト
+            Statement:
+              # 許可の効果を持つステートメント
+              - Effect: Allow
+                #  全てのS3アクションを許可
+                Action: s3:*
+                # 指定されたS3バケットとその中の全てのリソースを対象とするリソース。!Join 関数を使って文字列を結合し、特定のリソースを指定。
+                Resource: !Join ["/", [!GetAtt S3.Arn, "*"]]
+
+# ----------------------------------------------------------------
+#   S3 IAMインスタンスプロファイルの定義
+# ----------------------------------------------------------------
+  # リソースの論理ID。テンプレート内でこのIAMインスタンスプロファイルを参照するための名前。
+  InstanceProfile:
+    # リソースのタイプ。ここではIAMインスタンスプロファイルを作成。
+    Type: AWS::IAM::InstanceProfile
+    # IAMインスタンスプロファイルに関するプロパティの定義
+    Properties:
+      # インスタンスプロファイルのパス
+      Path: /
+      # このインスタンスプロファイルに関連付けるロールのリスト。
+      Roles:
+        # 先に定義したIAMロール Role を参照
+        - !Ref Role
+
+# ----------------------------------------------------------------
+#   EC2インスタンスの定義
+# ----------------------------------------------------------------
+  EC2:
+    # リソースのタイプ。EC2インスタンスを作成
+    Type: AWS::EC2::Instance
+    # EC2インスタンスに関するプロパティの定義
+    Properties:
+      # EC2インスタンスを配置するサブネットのID。PublicSubnet1aを参照。
+      SubnetId: !Ref PublicSubnet1a
+      # インスタンスプロファイルの参照。事前に定義されたInstanceProfileを指定。
+      IamInstanceProfile: !Ref InstanceProfile
+      # インスタンスに使用するAMI（Amazon Machine Image）のID。ここではAmazon Linux2のAMIを指定。
+      ImageId: ami-03d25459ad01ac2b9
+      # インスタンスタイプを指定。t2.microを使用
+      InstanceType: t2.micro
+      # EC2インスタンスにSSH接続するためのキーペアの名前。事前に作成しておく必要がある。作成したキーペア名をCloudFormationテンプレート内のKeyNameプロパティに指定。
+      KeyName: lecture10_aws_ec2_sshkey
+      # セキュリティグループのIDを指定。事前に定義されたSecurityGroupEC2を参照
+      SecurityGroupIds:
+        - !Ref SecurityGroupEC2
+      # タグを追加。インスタンスの名前を指定
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-ec2-1a"
+
+# ----------------------------------------------------------------
+#   RDSのシークレットマネージャーの定義
+# ----------------------------------------------------------------
+  # リソースの論理ID。CloudFormationスタック内でこのリソースを識別するために使用
+  RDSSecret:
+    # Secrets Managerのシークレットを作成するためのリソースタイプ
+    Type: "AWS::SecretsManager::Secret"
+    # リソースのプロパティを定義
+    Properties:
+      # シークレットの名前を指定。!Sub関数を使用してlecture10-rds-secret
+      Name: !Sub "${NameBase}-rds-secret"
+      # シークレットの説明文
+      Description: "This SecretsManager is for RDS instance"
+      # 自動的に生成されるシークレット文字列の設定を定義
+      GenerateSecretString:
+        # シークレットに含まれる固定の部分をJSON形式で指定。ユーザー名として"admin"を指定。
+        SecretStringTemplate: "{\"username\": \"admin\"}"
+        # 自動生成されるシークレットのキーを指定
+        GenerateStringKey: "password"
+        # 自動生成されるパスワードの長さを指定
+        PasswordLength: 16
+        # 自動生成されるパスワードから除外する文字を指定
+        ExcludeCharacters: "\"'`@/\\"
+
+# ----------------------------------------------------------------
+#   RDSインスタンスの定義
+# ----------------------------------------------------------------
+  # CloudFormationテンプレート内でのこのリソースの識別子
+  RDS:
+    # RDSインスタンスを作成するためのリソースタイプ
+    Type: AWS::RDS::DBInstance
+    Properties:
+      # RDSインスタンスの名前を定義。lecture10-rds
+      DBInstanceIdentifier: !Sub "${NameBase}-rds"
+      # インスタンスのスペックを定義。db.t3.microを使用
+      DBInstanceClass: db.t3.micro
+      #  使用するデータベースエンジンを指定。mysql
+      Engine: mysql
+      # MySQLのバージョンを指定
+      EngineVersion: 8.0.35
+      # Secrets Managerから取得するユーザー名を指定
+      MasterUsername: !Sub "{{resolve:secretsmanager:${RDSSecret}:SecretString:username}}"
+      # Secrets Managerから取得するパスワードを指定
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${RDSSecret}:SecretString:password}}"
+      # 高可用性のためのマルチAZ配置。Falseに設定しRDSインスタンスは単一のアベイラビリティゾーンにのみ配置。
+      MultiAZ: False
+      # ストレージの種類を指定。gp2（汎用SSD）
+      StorageType: gp2
+      # 割り当てるストレージ容量（GB単位）を指定。20GB
+      AllocatedStorage: 20
+      # インスタンスをパブリックにアクセス可能にするかどうかを指定。false（非公開）
+      PubliclyAccessible: false
+      # データベースがリスンするポート番号を指定。3306（MySQLのデフォルトポート）
+      Port: 3306
+      # インスタンスを配置するサブネットグループを指定。!Ref RDSSubnetGroupで別途定義されたサブネットグループを参照
+      DBSubnetGroupName: !Ref RDSSubnetGroup
+      # インスタンスに関連付けるセキュリティグループを指定。!Ref SecurityGroupRDSで別途定義されたセキュリティグループを参照
+      VPCSecurityGroups:
+        - !Ref SecurityGroupRDS
+      # リソースに付与するタグを指定。Nameキーにlecture10-rdsという値
+      Tags:
+        - Key: Name
+          Value: !Sub "${NameBase}-rds"
+
+# ----------------------------------------------------------------
+#   RDSのシークレットマネージャーとRDSインスタンスの関連付け
+# ----------------------------------------------------------------
+  RDSSecretTargetAttachment:
+    # Secrets Managerのシークレットを特定のリソースに関連付けるためのリソースタイプ
+    Type: "AWS::SecretsManager::SecretTargetAttachment"
+    Properties:
+      # シークレットを関連付ける対象のタイプを指定します。ここではRDSのDBインスタンスを指定
+      TargetType: AWS::RDS::DBInstance
+      # シークレットを関連付ける具体的なRDSインスタンスのIDを参照
+      TargetId: !Ref RDS
+      # 関連付けるシークレットのIDを参照
+      SecretId: !Ref RDSSecret
+
+# ----------------------------------------------------------------
+#   RDSのサブネットグループの定義
+# ----------------------------------------------------------------
+  RDSSubnetGroup:
+    # RDSのサブネットグループを作成するためのリソースタイプ
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      # サブネットグループの説明
+      DBSubnetGroupDescription: This DBSubnet Group is for RDS
+      # サブネットグループに含めるサブネットのリストを指定
+      SubnetIds:
+        # 最初のプライベートサブネットのIDを参照
+        - !Ref PrivateSubnet1a
+        # 二つ目のプライベートサブネットのIDを参照
+        - !Ref PrivateSubnet1c
+      Tags:
+        # タグのキーを指定
+        - Key: Name
+          # タグの値を指定。lecture-rds-subnet-group
+          Value: !Sub "${NameBase}-rds-subnet-group"
+
+# ----------------------------------------------------------------
+#   ELB（ALB）のターゲットグループの定義
+# ----------------------------------------------------------------
+  TargetGroup:
+    # ターゲットグループを作成するためのリソースタイプ
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      # ターゲットグループの名前を指定。lecture10-tg
+      Name: !Sub "${NameBase}-tg"
+      # ターゲットグループが使用するプロトコルを指定。HTTPプロトコルを指定
+      Protocol: HTTP
+      # ターゲットグループのポート番号を指定。ここではポート80。
+      Port: 80
+      # ターゲットグループが属するVPCのIDを指定。VPCというリソースのIDを参照
+      VpcId: !Ref VPC
+      # ターゲットのタイプを指定。EC2インスタンスをターゲットとするためにinstanceを指定
+      TargetType: instance
+      # ターゲットグループに属するターゲットを指定
+      Targets:
+        # ターゲットのIDを指定。先に定義されたEC2インスタンスを参照
+        - Id: !Ref EC2
+      # リソースにタグを付けるための設定
+      Tags:
+        # タグのキーを指定
+        - Key: Name
+          # タグの値を指定。lecture10-tg
+          Value: !Sub "${NameBase}-tg"
+
+# ----------------------------------------------------------------
+#  ELB（ALB）の定義
+# ----------------------------------------------------------------
+  ALB:
+    # アプリケーションロードバランサー（ALB）を作成するためのリソースタイプ
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      # ロードバランサーの名前を指定。lecture10-alb
+      Name:  !Sub "${NameBase}-alb"
+      # ロードバランサーのタイプを指定。アプリケーションロードバランサー（ALB）
+      Type: application
+      # ロードバランサーのスキームを指定。internet-facingを設定、ロードバランサーはインターネット経由でアクセス可能
+      Scheme: internet-facing
+      # ロードバランサーをデプロイするサブネットを指定
+      Subnets:
+        # 先に定義されたPublicSubnet1aを参照
+        - !Ref PublicSubnet1a
+        # 先に定義されたPublicSubnet1cを参照
+        - !Ref PublicSubnet1c
+      #  ロードバランサーに適用するセキュリティグループを指定
+      SecurityGroups:
+        # 先に定義されたSecurityGroupALBを参照
+        - !Ref SecurityGroupALB
+      Tags:
+        # タグのキーを指定
+        - Key: Name
+          # タグの値を指定。lecture10-alb
+          Value: !Sub "${NameBase}-alb"
+
+# ----------------------------------------------------------------
+#  ELB（ALB）のHTTPリスナーの定義
+# ----------------------------------------------------------------
+  Listener:
+    # ALBのリスナーを作成するためのリソースタイプ。リスナーは、ロードバランサーで受信する接続要求のプロトコルとポートを定義
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      # リスナーを関連付けるロードバランサーのARNを指定。先に定義されたALBリソースを参照
+      LoadBalancerArn: !Ref ALB
+      # リスナーが受信するトラフィックのプロトコルを指定
+      Protocol: HTTP
+      #  リスナーが受信するトラフィックのポート番号を指定。HTTPの標準ポートである80番を指定
+      Port: 80
+      # リスナーが受信したリクエストに対して実行するアクションを定義
+      DefaultActions:
+        # リスナーがリクエストを転送するアクションのタイプを指定。リクエストをターゲットグループに転送
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+# EOF警告を解消
+key: value
+
+
