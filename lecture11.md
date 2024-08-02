@@ -1,7 +1,7 @@
 ## 第１１回課題
 
 ### 実施内容
-1. Serverspecによるテストの実行第５回
+1. Serverspecによるテストの実行
    テストコード[lecture11_spec.rb](/file/lecture11_spec.rb)の作成 ※sample_spec.rbファイルとは別で作成
    <br>
 
