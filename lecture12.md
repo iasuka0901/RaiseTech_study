@@ -1,7 +1,7 @@
 ## 第１２回課題
 
 ### 実施内容
-1. CircleCIのサンプルコンフィグ[サンプルコンフィグ](https://github.com/MasatoshiMizumoto/raisetech_documents/tree/main/aws/samples/circleci)が正しく動作するようにリポジトリに組み込む<br>
+1. CircleCIの[サンプルコンフィグ](https://github.com/MasatoshiMizumoto/raisetech_documents/tree/main/aws/samples/circleci)が正しく動作するようにリポジトリに組み込む<br>
 
 CircleCIによるテスト実行結果<br>
 ![CircleCIによるテスト実行結果](/image/CircleCIによるテスト実行結果.png)<br>
