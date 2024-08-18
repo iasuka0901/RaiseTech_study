@@ -16,3 +16,7 @@ workflows:
   raisetech:
     jobs:
       - cfn-lint
+# EOF警告を解消
+key: value
+
+
