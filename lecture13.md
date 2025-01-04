@@ -21,10 +21,8 @@
 - execute-serverspec<br>![execute-serverspec成功](/image/lecture13/execute-serverspec成功.png)
 
 ####  3. サンプルアプリケーションの動作確認
--  ALBのDNSにアクセスして画像をアップロード
-![ALBへアクセス](/image/lecture13/ALBへアクセス.png)
-- 保存先がS3になっているか確認
-![保存先がS3になっている](/image/lecture13/保存先がS3になっている.png)
+-  ALBのDNSにアクセスして画像をアップロード<br>![ALBへアクセス](/image/lecture13/ALBへアクセス.png)
+- 保存先がS3になっているか確認<br>![保存先がS3になっている](/image/lecture13/保存先がS3になっている.png)
 
 ####  4. 感想
 - 環境変数がキャッシュされたり、RDSのパスワード（SercretManager利用）をうまく連携できなかったりかなりの時間を要してしまったが非常に勉強となる課題だった。
