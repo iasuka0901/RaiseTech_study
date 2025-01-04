@@ -6,7 +6,7 @@
 ※ 作成したコード等の詳細については[第13回課題リポジトリ](https://github.com/iasuka0901/AWS-lecture13)を参照
 
 #### AWS構成図
-![AWS構成図](/image/lecture13/AWS構成図.png)
+![AWS構成図](/image/lecture13/AWS構成図.jpg)
 
 ### 実施内容
 #### 1. 事前準備
