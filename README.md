@@ -13,7 +13,7 @@ CircleCIを使用して次のようにインフラストラクチャを自動構
 3. Serverspecで構築したサーバーに対して自動でテスト
 
 ## 構成図
-![AWS構成図](/image/lecture13/AWS構成図.jpg)
+![AWS構成図](/image/lecture13/AWS構成図.png)
 
 ## 講義内容
 |講義番号|学習テーマ|学習内容|提出物|
